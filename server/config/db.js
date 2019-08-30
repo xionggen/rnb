@@ -20,6 +20,6 @@ module.exports = {
             timestamps: false, // 默认不加时间戳
             freezeTableName: true, // 默认表名不加s
         },
-        timezone: '+08.00' // 东八时区
+        // timezone: '+08.00' // 东八时区
     }
 }

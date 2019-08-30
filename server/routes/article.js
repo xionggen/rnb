@@ -4,9 +4,9 @@
 
 const Router = require('koa-router');
 const router = new Router();
+const {create} = require('../controllers/article');
 
-
-router.post('/create', async ctx => ctx.body = '新建文章');
+router.post('/create', create);
 router.delete('/delete', async ctx => ctx.body = '删除文章');
 router.put('/update', async ctx => ctx.body = '修改文章');
 router.get('/list', async ctx => ctx.body = '查询文章');
