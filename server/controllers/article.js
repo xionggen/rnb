@@ -1,4 +1,6 @@
-// const Joi = require('joi');
+const Joi = require('joi');
+const ArticleSchema = require('../schemas/article');
+const {article: ArticleModel} = require('../models');
 
 /**
  * @description 新建文章
@@ -8,15 +10,13 @@
  */
 exports.create = async function create(ctx) {
     const {title, content} = ctx.request.body;
-    if(!title) {
-        // 文章标题不能为空
-        ctx.body = {code: 504, msg: '文章标题不能为空', data: null};
-        return;
+    const validator = Joi.validate(ctx.request.body, ArticleSchema.create)
+    if(validator.error) {
+        ctx.body = {code: 400, msg: validator.error.message};
+    } else {
+        const data = await ArticleModel.create(
+            {title, content}
+        );
+        ctx.body = {code: 200, msg: '创建文章成功', data};
     }
-    if(!content) {
-        // 文章内容不能为空
-        ctx.body = {code: 504, msg: '文章内容不能为空', data: null};
-        return;
-    }
-    ctx.body = {code: 200, msg: '创建文章成功', data: ctx.request.body};
 }

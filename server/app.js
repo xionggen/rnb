@@ -2,16 +2,7 @@ const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const logger = require('koa-logger');
 const router = require('./routes');
-
-const Sequelize = require('sequelize');
-const db = require('./config/db');
-const sequelize = new Sequelize(
-    db.database,
-    db.user,
-    db.password,
-    db.options,
-);
-
+const models = require('./models');
 
 // 生成Koa实例
 const app = new Koa();
@@ -25,13 +16,13 @@ app
 app.use(router.routes(), router.allowedMethods());
 
 app.listen(6060, () => {
-    sequelize
-        .authenticate()
+    models.sequelize
+        .sync({force: false, logging: false})
         .then(() => {
             console.log('数据库连接成功');
+            console.log('server is running at http://localhost:6060');
         })
         .catch((err) => {
             console.log(err);
         })
-    console.log('server is running at http://localhost:6060');
 })
