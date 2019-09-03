@@ -4,12 +4,12 @@
 
 const Router = require('koa-router');
 const router = new Router();
-const {create} = require('../controllers/article');
+const {create, getList, update, remove, getDetail} = require('../controllers/article');
 
 router.post('/create', create);
-router.delete('/delete', async ctx => ctx.body = '删除文章');
-router.put('/update', async ctx => ctx.body = '修改文章');
-router.get('/list', async ctx => ctx.body = '查询文章');
-router.get('/detail/:id', async ctx => ctx.body = '查询文章详情');
+router.delete('/delete', remove);
+router.put('/update', update);
+router.get('/list', getList);
+router.get('/detail/:code', getDetail);
 
 module.exports = router;
