@@ -1,103 +1,169 @@
-const Joi = require('joi');
-const ArticleSchema = require('../schemas/article');
-const {article: ArticleModel} = require('../models');
-const {Op} = require('sequelize');
-const uuid = require('node-uuid');
+const Joi = require('joi')
+const { Op } = require('sequelize');
+const ArticleSchema = require('../schemas/article')
 
-/**
- * @description 新建文章
- * @param {String} title 标题
- * @param {String} content 内容
- */
-exports.create = async function create(ctx) {
-    const {title, content} = ctx.request.body;
-    const validator = Joi.validate(ctx.request.body, ArticleSchema.create)
-    if(validator.error) {
-        ctx.body = {code: 400, msg: validator.error.message};
-    } else {
-        await ArticleModel.create(
-            {title, content, code: uuid.v1()}
-        );
-        ctx.body = {code: 200, msg: '创建文章成功', data: null};
+const {
+    article: ArticleModel,
+    tag: TagModel,
+    category: CategoryModel,
+    comment: CommentModel,
+    reply: ReplyModel,
+    user: UserModel,
+    sequelize
+} = require('../models')
+
+const { checkAuth } = require('../lib/token')
+
+module.exports = {
+    // 创建文章
+    async create(ctx) {
+        const isAuth = checkAuth(ctx)
+        if (isAuth) {
+            const { title, content, categories, tags } = ctx.request.body
+            const validator = Joi.validate(ctx.request.body, ArticleSchema.create)
+            if (validator.error) {
+                ctx.body = { code: 400, message: validator.error.message }
+            } else {
+                const tagList = tags.map(t => ({ name: t }))
+                const categoryList = categories.map(c => ({ name: c }))
+                const data = await ArticleModel.create(
+                    { title, content, tags: tagList, categories: categoryList },
+                    { include: [TagModel, CategoryModel] }
+                )
+                ctx.body = { code: 200, message: '成功创建文章', data }
+            }
+        }
+    },
+
+    // 修改文章
+    async update(ctx) {
+        const isAuth = checkAuth(ctx)
+        if (isAuth) {
+            const { articleId, title, content, categories, tags, showOrder } = ctx.request.body
+
+            if (showOrder !== undefined) {
+                // 文章设置置顶
+                await ArticleModel.update({ showOrder }, { where: { id: articleId } })
+                ctx.body = { code: 200, message: '文章置顶设置成功' }
+            } else {
+                const validator = Joi.validate(ctx.request.body, ArticleSchema.update)
+                if (validator.error) {
+                    ctx.body = { code: 400, message: validator.error.message }
+                } else {
+                    const tagList = tags.map(tag => ({ name: tag, articleId }))
+                    const categoryList = categories.map(cate => ({ name: cate, articleId }))
+                    await ArticleModel.update({ title, content }, { where: { id: articleId } })
+                    await TagModel.destroy({ where: { articleId } })
+                    await TagModel.bulkCreate(tagList)
+                    await CategoryModel.destroy({ where: { articleId } })
+                    await CategoryModel.bulkCreate(categoryList)
+
+                    ctx.body = { code: 200, message: '文章修改成功' }
+                }
+            }
+        }
+    },
+
+    // 获取文章详情
+    async getArticleById(ctx) {
+        const id = ctx.params.id
+        const data = await ArticleModel.findOne({
+            where: { id },
+            include: [
+                { model: TagModel, attributes: ['name'] },
+                { model: CategoryModel, attributes: ['name'] },
+                {
+                    model: CommentModel,
+                    attributes: ['id', 'userId', 'content', 'createdAt'],
+                    include: [
+                        {
+                            model: ReplyModel,
+                            attributes: ['id', 'userId', 'content', 'createdAt'],
+                            include: [{ model: UserModel, as: 'user', attributes: ['username'] }]
+                        },
+                        { model: UserModel, as: 'user', attributes: ['username'] }
+                    ]
+                }
+            ],
+            order: [[CommentModel, 'createdAt', 'DESC']],
+            row: true
+        })
+
+        ctx.body = { code: 200, data }
+    },
+
+    /**
+     * 查询文章列表
+     *
+     * @param {Number} offset - 当前页码 默认1
+     * @param {Number} limit - 限制查询数量 默认 10
+     * ...
+     */
+    async getArticleList(ctx) {
+        let { page = 1, pageSize = 10, title, tag, category, rangTime, fetchTop } = ctx.query,
+            offset = (page - 1) * pageSize,
+            queryParams = {},
+            order = [['createdAt', 'DESC']]
+
+        if (title) queryParams.title = { [Op.like]: `%${title}%` }
+        if (fetchTop === 'true') {
+            queryParams.showOrder = 1
+            order = [['updatedAt', 'DESC']]
+        }
+
+        const tagFilter = tag ? { name: tag } : {}
+        const categoryFilter = category ? { name: category } : {}
+
+        pageSize = parseInt(pageSize) // 处理 pageSize
+
+        const data = await ArticleModel.findAndCountAll({
+            where: queryParams,
+            include: [
+                { model: TagModel, attributes: ['name'], where: tagFilter },
+                { model: CategoryModel, attributes: ['name'], where: categoryFilter },
+                {
+                    model: CommentModel,
+                    attributes: ['id'],
+                    include: [{ model: ReplyModel, attributes: ['id'] }]
+                }
+            ],
+            offset,
+            limit: pageSize,
+            order,
+            row: true,
+            distinct: true
+        })
+
+        ctx.body = { code: 200, ...data }
+    },
+
+    // 删除文章
+    async delete(ctx) {
+        const isAuth = checkAuth(ctx)
+        if (isAuth) {
+            const { articleId } = ctx.query
+            if (articleId) {
+                if (articleId !== -1) {
+                    await TagModel.destroy({ where: { articleId } })
+                    await ArticleModel.destroy({ where: { id: articleId } })
+                    await sequelize.query(
+                        // `
+                        //   delete article, tag, category, comment, reply from article
+                        //   inner join tag on article.id=tag.articleId
+                        //   inner join category on article.id=category.articleId
+                        //   inner join comment on article.id=comment.articleId
+                        //   inner join reply on comment.id=reply.commentId
+                        //   where article.id=${articleId}
+                        // `
+                        `delete comment, reply from comment left join reply on comment.id=reply.commentId where comment.articleId=${articleId}`
+                    )
+                    ctx.body = { code: 200, message: '成功删除文章' }
+                } else {
+                    ctx.body = { code: 403, message: '禁止删除！ 此文章用于关于页面的留言。' }
+                }
+            } else {
+                ctx.body = { code: 403, message: '文章 id 不能为空' }
+            }
+        }
     }
-}
-
-/**
- * @description 查询文章列表
- * @param {Number} page 当前页码
- * @param {Number} pageSize 每页条数
- * @param {String} title 文章标题，（模糊查询->todo）
- */
-
-exports.getList = async function getList(ctx) {
-    let {page = 1, pageSize = 10, title = ''} = ctx.query;
-    page = parseInt(page);
-    pageSize = parseInt(pageSize);
-    let where = {};
-    let order = [['createdAt', 'DESC']];
-    if(title) {
-        where.title = {[Op.like]: `%${title}%`};
-    }
-    const data = await ArticleModel.findAndCountAll({
-        order,
-        where,
-        row: true,
-        limit: pageSize,
-    })
-    const {count, rows} = data;
-    ctx.body = {code: 200, msg: '查询文章列表成功', data: {total: count, list: rows}};
-}
-
-/**
- * @description 修改文章
- * @param {String} code 文章code
- * @param {String} title 文章标题
- * @param {String} content 文章内容
- */
-
-exports.update = async function update(ctx) {
-    const {code, title, content} = ctx.request.body;
-    const validator = Joi.validate(ctx.request.body, ArticleSchema.update);
-    if(validator.error) {
-        ctx.body = {code: 400, msg: validator.error.message, data: null};
-    } else {
-        await ArticleModel.update(
-            {
-                title,
-                content,
-            },
-            {where: {code}}
-        );
-        ctx.body = {code: 200, msg: '更新文章成功', data: null};
-    }
-}
-
-/**
- * @description 删除文章
- * @param {String} code 文章code
- */
-
-exports.remove = async function remove(ctx) {
-    const {code} = ctx.query;
-    if(code) {
-        await ArticleModel.destroy({where: {code}})
-        ctx.body = {code: 200, msg: '删除文章成功', data: null};
-    } else {
-        ctx.body = {code: 400, msg: '文章id不能为空', data: null};
-    }
-}
-
-/**
- * @description 获取文章详情
- * @param {String} code 文章code
- */
-
-exports.getDetail = async function getDetail(ctx) {
-    const {code} = ctx.params;
-    const data = await ArticleModel.findOne({
-        where: {code},
-        order: [['createdAt', 'DESC']],
-        row: true,
-    });
-    ctx.body = {code: 200, msg: '获取详情成功', data};
 }

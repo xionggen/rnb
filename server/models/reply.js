@@ -1,13 +1,15 @@
 const moment = require('moment')
 // article 表
 module.exports = (sequelize, dataTypes) => {
-  const Article = sequelize.define(
-    'article',
+  const Reply = sequelize.define(
+    'reply',
     {
-      id: { type: dataTypes.INTEGER(11), primaryKey: true, autoIncrement: true },
-      title: { type: dataTypes.STRING(255), allowNull: false },
-      content: { type: dataTypes.TEXT },
-      showOrder: { type: dataTypes.INTEGER(11) }, // 置顶文章展示的 order
+      id: {
+        type: dataTypes.INTEGER(11),
+        primaryKey: true,
+        autoIncrement: true
+      },
+      content: { type: dataTypes.TEXT, allowNull: false }, // 评论详情
       createdAt: {
         type: dataTypes.DATE,
         defaultValue: dataTypes.NOW,
@@ -28,12 +30,13 @@ module.exports = (sequelize, dataTypes) => {
     }
   )
 
-  Article.associate = models => {
-    Article.hasMany(models.tag)
-    Article.hasMany(models.category)
-    Article.hasMany(models.comment)
-    Article.hasMany(models.reply)
+  Reply.associate = models => {
+    Reply.belongsTo(models.user, {
+      foreignKey: 'userId',
+      targetKey: 'id',
+      constraints: false
+    })
   }
 
-  return Article
+  return Reply
 }
