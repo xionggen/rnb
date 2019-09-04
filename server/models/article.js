@@ -1,7 +1,7 @@
 const moment = require('moment');
 
 module.exports = (sequelize, dataTypes) => {
-    return sequelize.define(
+    const Article = sequelize.define(
         'article',
         {
             id: { type: dataTypes.INTEGER(11), primaryKey: true, autoIncrement: true },
@@ -28,4 +28,13 @@ module.exports = (sequelize, dataTypes) => {
             timestamps: false
         }
     )
+
+    Article.associate = models => {
+        Article.hasMany(models.tag);
+        Article.hasMany(models.category);
+        // Article.hasMany(models.comment);
+        // Article.hasMany(models.reply);
+    }
+
+    return Article;
 }
