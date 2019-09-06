@@ -1,0 +1,20 @@
+.article_card {
+    background: #fff;
+    padding: 18px 24px;
+    border-bottom: 1px solid #f1f1f1;
+    // margin-bottom: 5px;
+    .article_title {
+        margin: 6px 0 12px;
+        font-size: 16px;
+        color: #2e3135;
+    }
+    .article_desc {
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .article_author {
+        color: rgba(0, 0, 0, 0.4);
+    }
+    .article_update_time {
+        color: rgba(0, 0, 0, 0.2);
+    }
+}
