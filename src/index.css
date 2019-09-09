@@ -31,14 +31,13 @@ a {
   text-decoration: none;
 }
 
-input {
+input, button {
   border: none;
   outline: none;
-  text-indent: 10px;
 }
 
-input::placeholder {
+input, input::placeholder {
   color: #e5e5e5;
-  font-size: 12px;
+  font-size: 14px;
   text-indent: 10px;
 }

@@ -1,0 +1,21 @@
+.app_layout {
+    .app_container {
+        width: 100%;
+        max-width: 960px;
+        margin: 0 auto;
+        padding-bottom: 20px;
+        position: relative;
+        top: 70px;
+        display: flex;
+        .app_content {
+            background: #fff;
+            flex: 1;
+        }
+        .app_aside {
+            width: 240px;
+            // min-height: 300px;
+            margin-left: 20px;
+            background: #fff;
+        }
+    }
+}

@@ -34,11 +34,10 @@
         }
         .app_menu_item {
             margin: 0 20px;
-            & > a {
-                color: #71777c;
-            }
-            &:hover > a {
+            &:hover{
                 cursor: pointer;
+            }
+            &:hover, &.app_menu_item_active {
                 color: $theme-color;
             }
         }

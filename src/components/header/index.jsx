@@ -1,16 +1,22 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styles from './index.module.scss';
+import routes, {jumpRoute} from '../../routes';
 
 export default function Header() {
+    const [activeRoute, setActiveRoute] = useState();
+
+    function goRoute(name) {
+        setActiveRoute(name);
+        jumpRoute(name);
+    }
+
     return (
         <header className={styles.app_header}>
             <div className={styles.app_header_wrapper}>
                 <div className={styles.app_header_left}>
                     <div className={styles.app_logo}></div>
                     <ul className={styles.app_menu}>
-                        <li className={styles.app_menu_item}><a href="/">首页</a></li>
-                        <li className={styles.app_menu_item}><a href="/">分类</a></li>
-                        <li className={styles.app_menu_item}><a href="/">关于</a></li>
+                        {routes.map(({label, name}, i) => <li key={i} className={activeRoute === name ? `${styles.app_menu_item} ${styles.app_menu_item_active}` : `${styles.app_menu_item}`} onClick={() => goRoute(name)}>{label}</li>)}
                     </ul>
                 </div>
                 <div className={styles.app_header_right}>
