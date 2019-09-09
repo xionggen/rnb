@@ -2,8 +2,9 @@ import React, {useState} from 'react';
 import styles from './index.module.scss';
 import routes, {jumpRoute} from '../../routes';
 
-export default function Header() {
+export default function Header(props) {
     const [activeRoute, setActiveRoute] = useState();
+    const {onCreate} = props;
 
     function goRoute(name) {
         setActiveRoute(name);
@@ -23,7 +24,7 @@ export default function Header() {
                     {/* <div className={styles.app_search_bar}>
                         <input type="text" placeholder="搜索文章"/>
                     </div> */}
-                    <a href="/" className={styles.create_article_btn}>写文章</a>
+                    <label className={styles.create_article_btn} onClick={onCreate}>写文章</label>
                 </div>
             </div>
         </header>
