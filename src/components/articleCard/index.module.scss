@@ -2,19 +2,34 @@
     background: #fff;
     padding: 18px 24px;
     border-bottom: 1px solid #f1f1f1;
-    // margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
     .article_title {
         margin: 6px 0 12px;
         font-size: 16px;
+        font-weight: 600;
         color: #2e3135;
     }
-    .article_desc {
-        color: rgba(0, 0, 0, 0.6);
+    .article_record {
+        font-size: 14px;
+        color: #909090;
     }
-    .article_author {
-        color: rgba(0, 0, 0, 0.4);
+    .article_comment {
+        display: inline-block;
+        padding: 2px 10px;
+        font-size: 12px;
+        color: #909090;
+        border: 1px solid #edeeef;
+        i {
+            float: left;
+            transform: translate(0, 1px);
+        }
+        .article_comment_count {
+            float: right;
+            margin-left: 5px;
+        }
     }
-    .article_update_time {
-        color: rgba(0, 0, 0, 0.2);
+    .article_picture {
+        height: 80px;
     }
 }

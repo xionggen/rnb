@@ -1,13 +1,19 @@
 import React from 'react';
 import styles from './index.module.scss';
+import defaultImg from '../../assets/images/default.jpg';
 
 export default function ArticleCard() {
     return (
         <section className={styles.article_card}>
-            <h3 className={styles.article_title}>文章标题</h3>
-            <h4 className={styles.article_desc}>文章摘要</h4>
-            <h5 className={styles.article_author}>作者</h5>
-            <h6 className={styles.article_update_time}>更新时间</h6>
+            <div>
+                <p className={styles.article_record}>作者·更新时间·分类</p>
+                <p className={styles.article_title}>文章标题</p>
+                <p className={styles.article_comment}>
+                    <i className="iconfont comment"/>
+                    <span className={styles.article_comment_count}>0</span>
+                </p>
+            </div>
+            <img src={defaultImg} alt="" className={styles.article_picture}/>
         </section>
     )
 }

@@ -34,26 +34,60 @@
         }
         .app_menu_item {
             margin: 0 20px;
-            &:hover{
-                cursor: pointer;
-            }
+            cursor: pointer;
             &:hover, &.app_menu_item_active {
                 color: $theme-color;
             }
         }
     }
     .app_header_right {
+        display: flex;
+        align-items: center;
         .app_search_bar {
-            padding-bottom: 3px;
-            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
             margin-right: 30px;
-            &::after {
-                content: 'icon';
+            position: relative;
+            .app_search_bar_line {
+                position: absolute;
+                width: 0;
+                bottom: 0;
+                height: 1px;
+                background: $theme-color;
+            }
+            .app_search_bar_line_active {
+                animation: search_input_line_show 0.3s cubic-bezier(0.215, 0.610, 0.355, 1) forwards;
+            }
+            i {
+                color: #c3c3c3;
+                margin: 2px 4px 0 0;
+                font-size: 24px;
+            }
+            .app_search_input {
+                color: #a7a7a7;
+                font-size: 14px;
+            }
+            input::-webkit-input-placeholder {
+                font-size: 10px;
+                color: #c3c3c3;
+            }
+            @keyframes search_input_line_show {
+                0% {
+                    width: 0;
+                }
+                100% {
+                    width: 100%;
+                }
             }
         }
         .create_article_btn {
-            font-size: 16px;
+            font-size: 15px;
             color: $theme-color;
+            display: flex;
+            align-items: center;
+            &:hover {
+                color: darken($theme-color, 10%);
+            }
         }
     }
 }

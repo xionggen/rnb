@@ -18,7 +18,7 @@ code {
     monospace;
 }
 
-html, body, ul, ol, li, table, dl, dt, dd, p, h1, h2, h3, h4, h5, h6 {
+html, body, ul, ol, li, table, dl, dt, dd, p, h1, h2, h3, h4, h5, h6, input {
   padding: 0;
   margin: 0;
 }
