@@ -44,7 +44,7 @@
     "koa-logger": "^3.2.1",
     "koa-router": "^7.4.0",
     "koa2-cors": "^2.0.6",
-    "marked": "^0.7.0",
+    "marked": "^4.0.10",
     "mini-css-extract-plugin": "0.5.0",
     "moment": "^2.24.0",
     "mysql2": "^1.7.0",
