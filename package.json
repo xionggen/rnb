@@ -155,7 +155,7 @@
   },
   "devDependencies": {
     "cross-env": "^5.2.1",
-    "node-sass": "^4.12.0",
+    "node-sass": "^7.0.0",
     "nodemon": "^1.19.1"
   }
 }
